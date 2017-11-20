@@ -9,6 +9,7 @@
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using namespace std;
 
 class UKF {
 public:
@@ -30,6 +31,12 @@ public:
 
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
+
+  ///* predicted state mean
+  VectorXd x_pred_;
+    
+  ///* predicted covariance matrix
+  MatrixXd P_pred_;
 
   ///* time when the state is true, in us
   long long time_us_;
@@ -102,6 +109,19 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+    
+private:
+    // Output filestreams for radar and laser NIS
+    ofstream NIS_radar_;
+    ofstream NIS_laser_;
+    
+    void AugmentedSigmaPoints(MatrixXd& Xsig_out);
+    void SigmaPointPrediction(const MatrixXd& Xsig_aug, double delta_t);
+    void PredictMeanAndCovariance();
+    
+    void PredictLidarMeasurement(MatrixXd& Zsig_out, VectorXd& z_out, MatrixXd& S_out);
+    void PredictRadarMeasurement(MatrixXd& Zsig_out, VectorXd& z_out, MatrixXd& S_out);
+    void UpdateState(const VectorXd& z, const MatrixXd& Zsig, const VectorXd& z_pred, const MatrixXd& S);
 };
 
 #endif /* UKF_H */
